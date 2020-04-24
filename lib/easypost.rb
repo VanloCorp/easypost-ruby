@@ -36,18 +36,18 @@ require 'easypost/webhook'
 require 'easypost/error'
 
 module EasyPost
-  @@api_key = nil
-  @@api_base = 'https://api.easypost.com/v2'
-  @@api_version = nil
-  @@open_timeout = 30
-  @@timeout = 60
+  @api_key = nil
+  @api_base = 'https://api.easypost.com/v2'
+  @api_version = nil
+  @open_timeout = 30
+  @timeout = 60
 
-  def self.api_url(url='')
-    @@api_base + url
+  def self.api_url(url)
+    @api_base + url
   end
 
   def self.api_key=(api_key)
-    @@api_key = api_key
+    @api_key = api_key
   end
 
   def self.api_key
@@ -55,7 +55,7 @@ module EasyPost
   end
 
   def self.api_base=(api_base)
-    @@api_base = api_base
+    @api_base = api_base
   end
 
   def self.api_base
@@ -63,15 +63,15 @@ module EasyPost
   end
 
   def self.api_version=(version)
-    @@api_version = version
+    @api_version = version
   end
 
   def self.api_version
-    @@api_version
+    @api_version
   end
 
   def self.http_config
-    @@http_config ||= {
+    @http_config ||= {
       timeout: 60,
       open_timeout: 30,
       verify_ssl: OpenSSL::SSL::VERIFY_PEER,
@@ -80,33 +80,33 @@ module EasyPost
   end
 
   def self.http_config=(http_config_params)
-    self.http_config.merge!(http_config_params)
+    http_config.merge!(http_config_params)
   end
 
-  def self.request(method, url, api_key, params={}, headers={}, api_key_required=true)
-    api_key ||= @@api_key
+  def self.request(method, url, api_key, params = {}, headers = {}, api_key_required = true)
+    api_key ||= @api_key
     if api_key_required
       raise Error.new('No API key provided.') unless api_key
     end
 
     params = Util.objects_to_ids(params)
-    url = self.api_url(url)
+    url = api_url(url)
     case method.to_s.downcase.to_sym
     when :get, :head, :delete
       # Make params into GET parameters
       if params && params.count > 0
-        query_string = Util.flatten_params(params).collect{|key, value| "#{key}=#{Util.url_encode(value)}"}.join('&')
+        query_string = Util.flatten_params(params).collect { |key, value| "#{key}=#{Util.url_encode(value)}" }.join('&')
         url += "#{URI.parse(url).query ? '&' : '?'}#{query_string}"
       end
       payload = nil
     else
-      payload = Util.flatten_params(params).collect{|(key, value)| "#{key}=#{Util.url_encode(value)}"}.join('&')
+      payload = Util.flatten_params(params).collect { |(key, value)| "#{key}=#{Util.url_encode(value)}" }.join('&')
     end
 
     headers = {
       :user_agent => "EasyPost/v2 RubyClient/#{VERSION} Ruby/#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}",
       :authorization => "Bearer #{api_key}",
-      :content_type => 'application/x-www-form-urlencoded'
+      :content_type => 'application/x-www-form-urlencoded',
     }.merge(headers)
 
     opts = http_config.merge(
@@ -114,24 +114,25 @@ module EasyPost
         :method => method,
         :url => url,
         :headers => headers,
-        :payload => payload
+        :payload => payload,
       }
     )
 
     begin
       response = execute_request(opts)
     rescue RestClient::ExceptionWithResponse => e
-      if response_code = e.http_code and response_body = e.http_body
+      if e.http_code && e.http_body
         begin
-          response_json = MultiJson.load(response_body, :symbolize_keys => true)
+          response_json = MultiJson.load(e.http_body, :symbolize_keys => true)
         rescue MultiJson::DecodeError
-          raise Error.new("Invalid response from API, unable to decode.", response_code, response_body)
+          raise Error.new("Invalid response from API, unable to decode.", e.http_code, e.http_body)
         end
         begin
-          raise NoMethodError if response_json[:error][:message] == nil
-          raise Error.new(response_json[:error][:message], response_code, response_body, response_json)
+          raise NoMethodError if response_json[:error][:message].nil?
+
+          raise Error.new(response_json[:error][:message], e.http_code, e.http_body, response_json)
         rescue NoMethodError, TypeError
-          raise Error.new(response_json[:error], response_code, response_body, response_json)
+          raise Error.new(response_json[:error], e.http_code, e.http_body, response_json)
         end
       else
         raise Error.new(e.message)
@@ -143,15 +144,18 @@ module EasyPost
     begin
       response_json = MultiJson.load(response.body, :symbolize_keys => true)
     rescue MultiJson::DecodeError
-      raise Error.new("Invalid response object from API, unable to decode.", response.code, response.body)
+      raise Error.new(
+        "Invalid response object from API, unable to decode.",
+        response.code,
+        response.body
+      )
     end
 
-    return [response_json, api_key]
+    [response_json, api_key]
   end
-
-  private
 
   def self.execute_request(opts)
     RestClient::Request.execute(opts)
   end
+  private_class_method :execute_request
 end

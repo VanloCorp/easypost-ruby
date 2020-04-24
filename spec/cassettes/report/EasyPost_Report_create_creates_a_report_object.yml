@@ -1,0 +1,64 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.easypost.com/v2/reports/shipment
+    body:
+      encoding: UTF-8
+      string: start_date=2020-03-25&end_date=2020-04-24&type=shipment
+    headers:
+      Accept:
+      - "*/*"
+      User-Agent:
+      - EasyPost/v2 RubyClient/3.0.1 Ruby/2.6.6-p146
+      Authorization: "<AUTHORIZATION>"
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Content-Length:
+      - '55'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Host:
+      - api.easypost.com
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Ep-Request-Uuid:
+      - cc18d7395ea30d2afc9bec46000de6f9
+      Cache-Control:
+      - no-cache, no-store, must-revalidate, private
+      Pragma:
+      - no-cache
+      Expires:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      X-Runtime:
+      - '0.047365'
+      Transfer-Encoding:
+      - chunked
+      X-Node:
+      - bigweb8sj
+      X-Version-Label:
+      - easypost-202004232052-2747d42303-master
+      X-Backend:
+      - easypost
+      X-Proxied:
+      - extlb1sj 5834894b53
+      - intlb2sj 5834894b53
+      Strict-Transport-Security:
+      - max-age=15768000; includeSubDomains; preload
+    body:
+      encoding: ASCII-8BIT
+      string: '{"id":"shprep_8fb2b2c389dd4990b38ed2712b89da12","object":"ShipmentReport","created_at":"2020-04-24T15:51:50Z","updated_at":"2020-04-24T15:51:53Z","start_date":"2020-03-25","end_date":"2020-04-24","mode":"test","status":"available","url":"https://easypost-files.s3-us-west-2.amazonaws.com/files/shipment_report/20200424/shprep_8fb2b2c389dd4990b38ed2712b89da12.zip?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOR7PKFCRZS3YA6Q%2F20200424%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200424T160042Z&X-Amz-Expires=30&X-Amz-SignedHeaders=host&X-Amz-Signature=487343021ead94506b65c2025c1fddd2868d2870192fc2c5d24eb2cfade23570","url_expires_at":"2020-04-24T16:01:12+00:00","include_children":false}'
+    http_version: null
+  recorded_at: Fri, 24 Apr 2020 16:00:42 GMT
+recorded_with: VCR 5.1.0
